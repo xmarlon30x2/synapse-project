@@ -55,7 +55,7 @@ async def main() -> None:
     try:
         model_name: str = args.model
         base_url: str = args.base_url
-        api_key: str | None = args.api_key or getenv("SYNAPSE")
+        api_key: str | None = args.api_key or getenv("SYNAPSE_APIKEY")
 
         if not api_key:
             raise ValueError("No se ha detectado la API KEY")
