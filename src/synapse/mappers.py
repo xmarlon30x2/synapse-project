@@ -1,5 +1,5 @@
-from json import load
-from typing import Any
+import json
+from typing import Any, cast
 
 from mcp import StdioServerParameters, Tool
 from mcp.types import (
@@ -38,113 +38,126 @@ from .types import (
     UserMessage,
 )
 
-def validate_message(value: Any):
+# Funciones de validación y conversión entre nuestros tipos internos y los tipos de OpenAI/MCP
+
+
+def validate_message(value: Any) -> Message:
+    """
+    Valida que un diccionario crudo (por ejemplo, desde JSON) sea un mensaje válido
+    y devuelve la instancia de Message correspondiente (UserMessage, AssistantMessage o ToolMessage).
+    """
     if not isinstance(value, dict):
-        raise ValueError(
-        f"Un mensaje deben ser un dicionario: {value}"
-    )
-    role = validate_role(value.get("role"))
+        raise ValueError(f"Un mensaje debe ser un diccionario: {value}")
+    value = cast(dict[str, Any], value)
+    role: MessageRole = validate_role(value=value.get("role"))
     match role:
         case MessageRole.user:
-            content = validate_content(value.get("content"))
+            content: str = validate_content(value=value.get("content"))
             message = UserMessage(role=role, content=content)
         case MessageRole.assistant:
-            content = validate_content(value.get("content"))
-            tool_calls = validate_tool_calls(value.get("tool_calls", []))
+            content = validate_content(value=value.get("content"))
+            tool_calls: list[ToolCall] = validate_tool_calls(
+                value.get("tool_calls", [])
+            )
             message = AssistantMessage(
                 role=role, content=content, tool_calls=tool_calls
             )
         case MessageRole.tool:
-            content = validate_content(value.get("content"))
-            call_id = validate_tool_id(value.get("call_id"))
+            content = validate_content(value=value.get("content"))
+            call_id: str = validate_tool_id(value=value.get("call_id"))
             message = ToolMessage(role=role, content=content, call_id=call_id)
     return message
 
 
 def validate_content(value: Any) -> str:
+    """Valida que el contenido sea un string."""
     if not isinstance(value, str):
-        raise ValueError(f"Contenido no valido: {value}")
+        raise ValueError(f"Contenido no válido: {value}")
     return value
 
 
 def validate_tool_id(value: Any) -> str:
+    """Valida que el ID de herramienta sea un string."""
     if not isinstance(value, str):
-        raise ValueError(
-            f"ID de herramienta no valido: {value}"
-        )
+        raise ValueError(f"ID de herramienta no válido: {value}")
     return value
 
 
 def validate_tool_call_name(value: Any) -> str:
+    """Valida que el nombre de la herramienta sea un string."""
     if not isinstance(value, str):
-        raise ValueError(
-        f"Nombre de la herramienta no valido: {value}"
-    )
+        raise ValueError(f"Nombre de la herramienta no válido: {value}")
     return value
 
 
 def validate_arguments(value: Any) -> str:
+    """Valida que los argumentos de la herramienta sean un string JSON."""
     if not isinstance(value, str):
-        raise ValueError(
-        f"Argumentos de la herramienta no valido: {value}"
-    )
+        raise ValueError(f"Argumentos de la herramienta no válidos: {value}")
     return value
 
 
 def validate_role(value: Any) -> MessageRole:
+    """Valida que el rol sea uno de los permitidos y devuelve el enum."""
     try:
-        return MessageRole(value)
-    
+        return MessageRole(value=value)
     except ValueError:
-        raise ValueError(f"Rol no valido: {value}")
+        raise ValueError(f"Rol no válido: {value}") from None
 
-def json_filename_to_context_config(json_filename: str):
-    with open(json_filename) as file:
-        data = load(file)
-    return validate_context_config(data)
+
+def json_filename_to_context_config(json_filename: str) -> ContextConfig:
+    """Lee un archivo JSON y lo convierte en un objeto ContextConfig."""
+    with open(file=json_filename) as file:
+        data: Any = json.load(file)
+    return validate_context_config(value=data)
 
 
 def validate_context_config(value: Any) -> ContextConfig:
+    """Valida que el diccionario de configuración del contexto sea correcto."""
     if not isinstance(value, dict):
         raise ValueError(
-        f"La configuracion del contexto deben de ser un dicionario: {value}"
-    )
+            f"La configuración del contexto debe ser un diccionario: {value}"
+        )
+    value = cast(dict[str, Any], value)
     servers_raw = value.get("servers")
     if not isinstance(servers_raw, list):
-        raise ValueError(
-        f"Los servers deben de estar en una lista: {servers_raw}"
-    )
-
+        raise ValueError(f"Los servidores deben estar en una lista: {servers_raw}")
+    servers_raw = cast(list[Any], servers_raw)
     return ContextConfig(servers=list(map(validate_server_parameter, servers_raw)))
 
 
 def validate_server_parameter(value: Any) -> ServerParameters:
-    return ServerParameters(**value)  # TODO: Arreglar
+    """Convierte un diccionario en un objeto ServerParameters (validación básica)."""
+    # TODO: Mejorar validación (campos requeridos, tipos, etc.)
+    return ServerParameters(**value)
 
 
 def validate_tool_calls(value: Any) -> list[ToolCall]:
+    """Valida que sea una lista de llamadas a herramientas."""
     if not isinstance(value, list):
-        raise ValueError(
-        f"Las llamadas a herramientas deben de ser una lista: {value}"
-    )
-    return [validate_tool_call(item) for item in value]
+        raise ValueError(f"Las llamadas a herramientas deben ser una lista: {value}")
+    value = cast(list[Any], value)
+    return [validate_tool_call(value=item) for item in value]
 
 
 def validate_tool_call(value: Any) -> ToolCall:
+    """Valida un diccionario de llamada a herramienta y devuelve un objeto ToolCall."""
     if not isinstance(value, dict):
         raise ValueError(
-        f"Una llamada a una herramienta deben ser un dicionario: {value}"
-    )
+            f"Una llamada a una herramienta debe ser un diccionario: {value}"
+        )
+    value = cast(dict[str, Any], value)
     return ToolCall(
-        id=validate_tool_id(value.get("id")),
-        name=validate_tool_call_name(value.get("name")),
-        arguments=validate_arguments(value.get("arguments")),
+        id=validate_tool_id(value=value.get("id")),
+        name=validate_tool_call_name(value=value.get("name")),
+        arguments=validate_arguments(value=value.get("arguments")),
     )
 
 
 def server_parameters_to_stdio_server_parameters(
     server_parameters: ServerParameters,
 ) -> StdioServerParameters:
+    """Convierte nuestros ServerParameters a los parámetros que espera MCP para stdio."""
     return StdioServerParameters(
         args=server_parameters.args,
         command=server_parameters.command,
@@ -156,6 +169,7 @@ def server_parameters_to_stdio_server_parameters(
 
 
 def tool_to_tool_definition(tool: Tool) -> ToolDefinition:
+    """Convierte una herramienta de MCP a nuestra definición interna."""
     return ToolDefinition(
         name=tool.name,
         description=tool.description or "",
@@ -164,15 +178,21 @@ def tool_to_tool_definition(tool: Tool) -> ToolDefinition:
 
 
 def call_tool_result_to_content(tool_call_result: CallToolResult) -> str:
-    parts = []
+    """
+    Convierte el resultado de una llamada a herramienta (que puede contener múltiples partes)
+    en un solo string de texto plano.
+    """
+    parts: list[str] = []
     if tool_call_result.isError:
         parts.append("Error:")
     for part in tool_call_result.content:
         if isinstance(part, TextContent):
             parts.append(part.text)
         elif isinstance(part, ImageContent):
+            # En este caso, convertimos la imagen a su representación base64
             parts.append(part.data)
         elif isinstance(part, EmbeddedResource):
+            # Si es un recurso de texto, extraemos el texto; si es binario, extraemos el blob
             parts.append(
                 part.resource.text
                 if isinstance(part.resource, TextResourceContents)
@@ -182,6 +202,7 @@ def call_tool_result_to_content(tool_call_result: CallToolResult) -> str:
 
 
 def message_to_message_param(message: Message) -> ChatCompletionMessageParam:
+    """Convierte un mensaje interno al formato que espera la API de OpenAI."""
     if message.role is MessageRole.user:
         return ChatCompletionUserMessageParam(content=message.content, role="user")
 
@@ -203,6 +224,7 @@ def message_to_message_param(message: Message) -> ChatCompletionMessageParam:
 def tool_call_to_tool_call_param(
     tool_call: ToolCall,
 ) -> ChatCompletionMessageToolCallParam:
+    """Convierte una llamada a herramienta interna al formato de OpenAI."""
     return ChatCompletionMessageToolCallParam(
         id=tool_call.id,
         type="function",
@@ -210,7 +232,10 @@ def tool_call_to_tool_call_param(
     )
 
 
-def tool_definition_to_tool(tool_definition: ToolDefinition) -> ChatCompletionToolParam:
+def tool_definition_to_tool(
+    tool_definition: ToolDefinition,
+) -> ChatCompletionToolParam:
+    """Convierte una definición de herramienta interna al formato que OpenAI espera en la solicitud."""
     return ChatCompletionToolParam(
         type="function",
         function=FunctionDefinition(

@@ -1,5 +1,5 @@
 [project]
-name = "xm"
+name = "synapse-ai"
 version = "0.1.0"
 description = ""
 readme = "README.md"
@@ -21,13 +21,13 @@ dependencies = [
 ]
 
 [project.scripts]
-xm-cli = "auto_code_cli:main"
+synapse-cli = "synapse_cli:main"
 
 [project.urls]
-Homepage = "https://github.com/xmarlon30x2/xm"
-Documentation = "https://github.com/xmarlon30x2/xm/docs"
-Repository = "https://github.com/xmarlon30x2/xm"
-Issues = "https://github.com/xmarlon30x2/xm/issues"
+Homepage = "https://github.com/xmarlon30x2/synapse-ai"
+Documentation = "https://github.com/xmarlon30x2/synapse-ai/docs"
+Repository = "https://github.com/xmarlon30x2/synapse-ai"
+Issues = "https://github.com/xmarlon30x2/synapse-ai/issues"
 
 [build-system]
 requires = ["setuptools>=61"]
