@@ -29,6 +29,11 @@ class Memory(ABC):
         pass
 
     @abstractmethod
+    async def clear(self) -> None:
+        """Limpia todos los mensajes"""
+        pass
+
+    @abstractmethod
     async def all(self) -> list[Message]:
         """Devuelve todos los mensajes almacenados."""
         pass
@@ -66,6 +71,10 @@ class JSONFileMemory(Memory):
     def __init__(self, filename: Path) -> None:
         self.filename: Path = filename
         self.messages: list[Message] = []
+
+    async def clear(self) -> None:
+        self.messages = []
+        await self.save()
 
     async def close(self) -> None:
         await self.save()

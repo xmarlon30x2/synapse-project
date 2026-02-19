@@ -31,6 +31,7 @@ class SynapseCli:
             "exit": self.exit,
             "send": self.send,
             "help": self.help,
+            "clear": self.clear,
         }
 
     async def exit(self, arg: str):
@@ -47,6 +48,10 @@ class SynapseCli:
         """Comando para enviar un mensaje al agente sin ejecutarlo."""
         user_message = UserMessage(content=arg)
         await self.agent.memory.add(message=user_message)
+
+    async def clear(self, arg: str) -> None:
+        """Elimina todos los mensajes"""
+        await self.agent.memory.clear()
 
     async def callback(self, user_input: str) -> None:
         """
