@@ -1,4 +1,5 @@
 import json
+from os.path import exists
 from typing import Any, cast
 
 from mcp import StdioServerParameters, Tool
@@ -107,9 +108,11 @@ def validate_role(value: Any) -> MessageRole:
 
 def json_filename_to_context_config(json_filename: str) -> ContextConfig:
     """Lee un archivo JSON y lo convierte en un objeto ContextConfig."""
-    with open(file=json_filename) as file:
-        data: Any = json.load(file)
-    return validate_context_config(value=data)
+    if exists(path=json_filename):
+        with open(file=json_filename) as file:
+            data: Any = json.load(file)
+        return validate_context_config(value=data)
+    return ContextConfig(servers=[])
 
 
 def validate_context_config(value: Any) -> ContextConfig:
