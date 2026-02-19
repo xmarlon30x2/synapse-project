@@ -41,6 +41,7 @@ class SynapseCli:
         """Comando para mostrar ayuda."""
         for name, command in self.command_registry.items():
             await asyncio.to_thread(print, f"/{name:<10s} {command.__doc__ or ''}")
+        await asyncio.to_thread(print, "\n")
 
     async def send(self, arg: str) -> None:
         """Comando para enviar un mensaje al agente sin ejecutarlo."""
@@ -94,9 +95,9 @@ class SynapseCli:
         Bucle principal de la CLI: lee entrada del usuario, maneja comandos
         o llama a callback() para procesar la entrada.
         """
-        await asyncio.to_thread(print, "Welcome to Synapse CLI!")
+        await asyncio.to_thread(print, "Welcome to Synapse CLI!\n")
         await asyncio.to_thread(print, "Write /help to show help")
-        await asyncio.to_thread(print, "Write anything to run the agent")
+        await asyncio.to_thread(print, "Write anything to run the agent\n\n")
         try:
             while True:
                 # Leer entrada del usuario (en hilo separado para no bloquear)
