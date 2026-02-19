@@ -13,12 +13,16 @@ from synapse_core.types import ContextConfig
 from .cli import SynapseCli
 
 
-async def main() -> None:
+def main() -> None:
     """
     Función principal de la CLI.
     Parsea argumentos, inicializa los componentes (memoria, modelo, contexto),
     crea el agente y ejecuta el bucle de la CLI.
     """
+    asyncio.run(async_main())
+
+
+async def async_main() -> None:
     parser = argparse.ArgumentParser(description="Agente de IA")
     parser.add_argument(
         "--context-filename",
