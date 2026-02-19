@@ -88,7 +88,9 @@ class SynapseCli:
         Bucle principal de la CLI: lee entrada del usuario, maneja comandos
         o llama a callback() para procesar la entrada.
         """
-        await asyncio.to_thread(print, "Welcome to Synapse CLI! write /help for show help")
+        await asyncio.to_thread(print, "Welcome to Synapse CLI!")
+        await asyncio.to_thread(print, "Write /help to show help")
+        await asyncio.to_thread(print, "Write anything to run the agent")
         try:
             while True:
                 # Leer entrada del usuario (en hilo separado para no bloquear)
