@@ -3,6 +3,8 @@ import asyncio
 from os import getenv
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 from synapse_core.agent import Agent
 from synapse_core.context import Context
 from synapse_core.mappers import json_filename_to_context_config
@@ -23,6 +25,8 @@ def main() -> None:
 
 
 async def async_main() -> None:
+    await asyncio.to_thread(load_dotenv)
+
     parser = argparse.ArgumentParser(description="Agente de IA")
     parser.add_argument(
         "--context-filename",
