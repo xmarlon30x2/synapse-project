@@ -8,5 +8,8 @@ wheels/
 
 # Virtual environments
 .venv
+
+.env
+
 join_files.py
 xm-project.txt

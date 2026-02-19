@@ -3,12 +3,12 @@ import asyncio
 from os import getenv
 from pathlib import Path
 
-from synapse.agent import Agent
-from synapse.context import Context
-from synapse.mappers import json_filename_to_context_config
-from synapse.memory import JSONFileMemory
-from synapse.model import Model
-from synapse.types import ContextConfig
+from synapse_core.agent import Agent
+from synapse_core.context import Context
+from synapse_core.mappers import json_filename_to_context_config
+from synapse_core.memory import JSONFileMemory
+from synapse_core.model import Model
+from synapse_core.types import ContextConfig
 
 from .cli import SynapseCli
 

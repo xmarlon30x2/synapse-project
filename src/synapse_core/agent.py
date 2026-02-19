@@ -2,12 +2,10 @@ from collections import defaultdict
 from collections.abc import AsyncGenerator
 from typing import Any
 
-from synapse.types import Message, Token, ToolMessage
-
 from .context import Context
 from .memory import Memory
 from .model import Model
-from .types import AssistantMessage, TokenType, ToolCall
+from .types import AssistantMessage, Message, Token, TokenType, ToolCall, ToolMessage
 
 
 class Agent:

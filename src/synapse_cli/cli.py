@@ -3,8 +3,8 @@ from collections.abc import Callable
 from types import CoroutineType
 from typing import Any
 
-from synapse.agent import Agent
-from synapse.types import (
+from synapse_core.agent import Agent
+from synapse_core.types import (
     TextToken,
     ToolCallArgumentsToken,
     ToolCallIDToken,
