@@ -40,7 +40,7 @@ class SynapseCli:
     async def help(self, arg: str) -> None:
         """Comando para mostrar ayuda."""
         for name, command in self.command_registry.items():
-            await asyncio.to_thread(print, f"/{name:<10d} {command.__doc__ or ''}")
+            await asyncio.to_thread(print, f"/{name:<10s} {command.__doc__ or ''}")
 
     async def send(self, arg: str) -> None:
         """Comando para enviar un mensaje al agente sin ejecutarlo."""
