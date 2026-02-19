@@ -83,6 +83,12 @@ class SynapseCli:
         # Línea en blanco después de la respuesta completa
         await asyncio.to_thread(print, "\n")
 
+    def input(self) -> str | None:
+        try:
+            return input(self.prompt)
+        except KeyboardInterrupt:
+            return None
+
     async def loop(self) -> None:
         """
         Bucle principal de la CLI: lee entrada del usuario, maneja comandos
@@ -94,9 +100,12 @@ class SynapseCli:
         try:
             while True:
                 # Leer entrada del usuario (en hilo separado para no bloquear)
-                user_input: str = await asyncio.to_thread(input, self.prompt)
+                user_input: str | None = await asyncio.to_thread(self.input)
 
-                if not user_input:
+                if user_input is None:
+                    break
+
+                if not user_input.strip():
                     continue
 
                 # Si comienza con '/', es un comando interno
