@@ -1,5 +1,5 @@
 [project]
-name = "synapse-ai"
+name = "synapse-project"
 version = "1.0.0"
 description = ""
 readme = "README.md"
@@ -25,10 +25,10 @@ dependencies = [
 synapse-cli = "synapse_cli:main"
 
 [project.urls]
-Homepage = "https://github.com/xmarlon30x2/synapse-ai"
-Documentation = "https://github.com/xmarlon30x2/synapse-ai/docs"
-Repository = "https://github.com/xmarlon30x2/synapse-ai"
-Issues = "https://github.com/xmarlon30x2/synapse-ai/issues"
+Homepage = "https://github.com/xmarlon30x2/synapse-project"
+Documentation = "https://github.com/xmarlon30x2/synapse-project/docs"
+Repository = "https://github.com/xmarlon30x2/synapse-project"
+Issues = "https://github.com/xmarlon30x2/synapse-project/issues"
 
 [build-system]
 requires = ["setuptools>=61"]

@@ -25,14 +25,14 @@ Synapse AI es un framework modular y flexible para construir agentes conversacio
 Opción 1: Instalación desde PyPI (cuando esté publicado)
 
 ```bash
-pip install synapse-ai
+pip install synapse-project
 ```
 
 Opción 2: Instalación desde el repositorio
 
 ```bash
-git clone https://github.com/xmarlon30x2/synapse-ai.git
-cd synapse-ai
+git clone https://github.com/xmarlon30x2/synapse-project.git
+cd synapse-project
 python -m venv venv
 source venv/bin/activate  # En Windows: venv\Scripts\activate
 pip install -e .

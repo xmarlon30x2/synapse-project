@@ -432,7 +432,7 @@ wheels = [
 ]
 
 [[package]]
-name = "synapse-ai"
+name = "synapse-project"
 version = "1.0.0"
 source = { editable = "." }
 dependencies = [
