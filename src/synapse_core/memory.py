@@ -81,15 +81,14 @@ class JSONFileMemory(Memory):
 
     async def setup(self) -> None:
         """Carga los mensajes desde el archivo si existe."""
-        if not self.filename.exists():
-            self.messages = []
-            return
-
         # Usamos to_thread para no bloquear el event loop con I/O de archivo
         await to_thread(self._load_task)
 
     def _load_task(self) -> None:
         """Tarea síncrona de carga del archivo."""
+        if not self.filename.exists():
+            self.messages = []
+            return
         with self.filename.open(encoding="utf-8") as file:
             save = json.load(file)
             if not isinstance(save, dict):

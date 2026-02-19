@@ -109,7 +109,7 @@ def validate_role(value: Any) -> MessageRole:
 def json_filename_to_context_config(json_filename: str) -> ContextConfig:
     """Lee un archivo JSON y lo convierte en un objeto ContextConfig."""
     if exists(path=json_filename):
-        with open(file=json_filename) as file:
+        with open(file=json_filename, encoding='utf-8') as file:
             data: Any = json.load(file)
         return validate_context_config(value=data)
     return ContextConfig(servers=[])
