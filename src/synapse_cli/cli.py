@@ -128,6 +128,6 @@ class SynapseCli:
 
                 # Entrada normal del usuario
                 await self.callback(user_input=user_input)
-        except KeyboardInterrupt:
+        except (KeyboardInterrupt, asyncio.CancelledError):
             # Salida limpia con Ctrl+C
             pass
