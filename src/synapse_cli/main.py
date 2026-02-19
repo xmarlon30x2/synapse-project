@@ -25,7 +25,7 @@ def main() -> None:
 
 
 async def async_main() -> None:
-    await asyncio.to_thread(load_dotenv)
+    await asyncio.to_thread(load_dotenv, dotenv_path='.env')
 
     parser = argparse.ArgumentParser(description="Agente de IA")
     parser.add_argument(
