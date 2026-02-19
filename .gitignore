@@ -12,6 +12,7 @@ wheels/
 .env
 
 synapse-memory.json
+synapse-context.json
 
 join_files.py
 xm-project.txt
