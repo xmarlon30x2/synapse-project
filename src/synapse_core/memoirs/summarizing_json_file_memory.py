@@ -6,9 +6,13 @@ de conversaciones largas para mantener la memoria eficiente y enfocada.
 """
 
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from ..types import AssistantMessage, Message, MessageRole
+from ..types import Message, TextToken, UserMessage
 from .json_file_memory import JSONFileMemory
+
+if TYPE_CHECKING:
+    from ..model import Model
 
 
 class SummarizingJSONFileMemory(JSONFileMemory):
@@ -18,11 +22,18 @@ class SummarizingJSONFileMemory(JSONFileMemory):
     """
 
     def __init__(
-        self, filename: Path, max_messages: int = 1000, summary_threshold: int = 500
+        self,
+        filename: Path,
+        model: 'Model',
+        sumarize_prompt: str,
+        max_messages: int = 100,
+        summary_threshold: int = 50,
     ) -> None:
         super().__init__(filename)
+        self.model = model
         self.max_messages: int = max_messages
         self.summary_threshold: int = summary_threshold
+        self.sumarize_prompt: str = sumarize_prompt
 
     async def add(self, message: Message) -> None:
         """Añade un nuevo mensaje y gestiona el resumen si es necesario."""
@@ -34,26 +45,23 @@ class SummarizingJSONFileMemory(JSONFileMemory):
 
     async def _create_summary(self) -> None:
         """Crea un resumen de la conversación y mantiene solo los mensajes recientes."""
-
-        # Obtener mensajes recientes
-        recent_messages = await self.get_history(self.max_messages)
-
-        # Crear resumen (en una implementación real, usaríamos el modelo para resumir)
-        summary = "Resumen: Conversación larga resumida automáticamente."
-
-        # Crear mensaje de resumen
-        summary_message = AssistantMessage(
-            content=summary, role=MessageRole.assistant, tool_calls=[]
+        self.messages, overflow_messages = (
+            self.messages[self.summary_threshold :],
+            self.messages[: self.summary_threshold],
         )
+        overflow_messages.append(UserMessage(content=self.sumarize_prompt))
 
-        # Mantener solo mensajes recientes + resumen
-        self.messages = recent_messages + [summary_message]
-        self._index = {msg.id: msg for msg in self.messages if hasattr(msg, "id")}
+        summary = "Resumen de la converzacion:\n"
+        async for token in self.model.create_chat_stream(
+            messages=overflow_messages, tool_definitions=[]
+        ):
+            if isinstance(token, TextToken):
+                summary += token.text
 
-        # Guardar cambios
+        self.messages.insert(0, UserMessage(content=summary))
         await self.save()
 
     async def compact(self) -> None:
         """Compacta la memoria eliminando mensajes antiguos y creando resúmenes."""
-        if len(self.messages) > self.summary_threshold:
+        if len(self.messages) > self.max_messages:
             await self._create_summary()
