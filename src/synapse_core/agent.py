@@ -3,7 +3,7 @@ from collections.abc import AsyncGenerator
 from typing import Any
 
 from .context import Context
-from .memory import Memory
+from .memoirs.memory import Memory
 from .model import Model
 from .types import AssistantMessage, Message, Token, TokenType, ToolCall, ToolMessage
 
@@ -25,7 +25,7 @@ class Agent:
         self.context: Context = context
 
     async def __aenter__(self):
-        await self.memory.setup()
+        await self.memory.initialize()
         await self.context.setup()
         return self
 

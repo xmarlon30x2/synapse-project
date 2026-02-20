@@ -1,5 +1,4 @@
 import json
-from abc import ABC, abstractmethod
 from asyncio import to_thread
 from dataclasses import asdict
 from enum import Enum
@@ -7,52 +6,12 @@ from json import JSONEncoder
 from pathlib import Path
 from typing import Any, cast
 
-from .mappers import validate_message
-from .types import Message, MessageRole, ToolCall
+from ..mappers import validate_message
+from ..types import Message, MessageRole, ToolCall
+from .memory import Memory
 
 
-class Memory(ABC):
-    """
-    Interfaz abstracta para la memoria del agente.
-    Define los métodos necesarios para almacenar y recuperar mensajes,
-    así como para obtener las herramientas pendientes.
-    """
-
-    @abstractmethod
-    async def setup(self) -> None:
-        """Inicializa la memoria"""
-        pass
-
-    @abstractmethod
-    async def close(self) -> None:
-        """Cierra la memoria"""
-        pass
-
-    @abstractmethod
-    async def clear(self) -> None:
-        """Limpia todos los mensajes"""
-        pass
-
-    @abstractmethod
-    async def all(self) -> list[Message]:
-        """Devuelve todos los mensajes almacenados."""
-        pass
-
-    @abstractmethod
-    async def add(self, message: Message) -> None:
-        """Añade un nuevo mensaje a la memoria."""
-        pass
-
-    @abstractmethod
-    async def next_pending_tool_calls(self) -> list[ToolCall]:
-        """
-        Devuelve las llamadas a herramientas que aún no tienen respuesta.
-        Es decir, tool calls de mensajes assistant que no tienen un tool message correspondiente.
-        """
-        pass
-
-
-class MessageEncoder(JSONEncoder):
+class _MessageEncoder(JSONEncoder):
     """
     Codificador JSON personalizado para manejar objetos Enum.
     """
@@ -79,7 +38,7 @@ class JSONFileMemory(Memory):
     async def close(self) -> None:
         await self.save()
 
-    async def setup(self) -> None:
+    async def initialize(self) -> None:
         """Carga los mensajes desde el archivo si existe."""
         # Usamos to_thread para no bloquear el event loop con I/O de archivo
         await to_thread(self._load_task)
@@ -110,7 +69,7 @@ class JSONFileMemory(Memory):
             json.dump(
                 {"messages": list(map(asdict, self.messages))},
                 file,
-                cls=MessageEncoder,
+                cls=_MessageEncoder,
             )
 
     async def all(self) -> list[Message]:
