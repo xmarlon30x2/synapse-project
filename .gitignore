@@ -10,6 +10,7 @@ wheels/
 .venv
 
 .env
+typings
 
 synapse-memory.json
 synapse-context.json
