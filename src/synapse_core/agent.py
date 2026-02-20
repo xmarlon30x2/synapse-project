@@ -1,3 +1,10 @@
+"""
+Agente Principal - Coordinador del Sistema
+
+Este módulo implementa el agente principal que coordina el modelo de lenguaje,
+la memoria persistente y el contexto de ejecución de herramientas externas.
+"""
+
 from collections import defaultdict
 from collections.abc import AsyncGenerator
 from typing import Any
@@ -5,7 +12,14 @@ from typing import Any
 from .context import Context
 from .memoirs.memory import Memory
 from .model import Model
-from .types import AssistantMessage, Message, Token, TokenType, ToolCall, ToolMessage
+from .types import (
+    AssistantMessage,
+    Message,
+    Token,
+    TokenType,
+    ToolCall,
+    ToolMessage,
+)
 
 
 class Agent:
@@ -29,7 +43,7 @@ class Agent:
         await self.context.setup()
         return self
 
-    async def __aexit__(self, a: Any, b: Any, c: Any):
+    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         await self.context.close()
         await self.memory.close()
 
@@ -69,7 +83,7 @@ class Agent:
                 # Es un diccionario con las claves como índices y los valores como llamadas a herramientas
                 # para poder acceder a cualquier llamada a herramienta sin importar el orden en el
                 # que llegue el token (porque pueden venir fragmentadas en varios chunks)
-                tool_calls_buffer: defaultdict[int, ToolCall] = defaultdict(
+                tool_calls_buffer: dict[int, ToolCall] = defaultdict(
                     lambda: ToolCall(id="", name="", arguments="")
                 )
 

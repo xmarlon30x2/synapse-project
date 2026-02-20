@@ -1,3 +1,10 @@
+"""
+Contexto - Gestión de Servidores MCP
+
+Este módulo gestiona la conexión con múltiples servidores MCP (Model Context Protocol)
+y la ejecución de herramientas en esos servidores.
+"""
+
 import json
 from contextlib import AsyncExitStack
 from itertools import chain
@@ -11,7 +18,12 @@ from .mappers import (
     server_parameters_to_stdio_server_parameters,
     tool_to_tool_definition,
 )
-from .types import ContextConfig, ToolCall, ToolDefinition, ToolMessage
+from .types import (
+    ContextConfig,
+    ToolCall,
+    ToolDefinition,
+    ToolMessage,
+)
 
 
 class Context:
@@ -25,16 +37,17 @@ class Context:
         # Mapa que asocia cada sesión de cliente con la lista de definiciones de herramientas que ofrece
         self.session_tools_map: dict[ClientSession, list[ToolDefinition]] = {}
         # Pila asíncrona para gestionar la entrada y salida de contextos (cliente stdio, sesiones)
-        self.stack: AsyncExitStack[bool | None] = AsyncExitStack()
+        self.stack: AsyncExitStack = AsyncExitStack()
 
     async def setup(self) -> None:
         """
         Inicializa las conexiones con los servidores MCP definidos en la configuración.
         Para cada servidor, establece un cliente stdio, crea una sesión y obtiene la lista de herramientas.
         """
-        tools_name: list[
+        registered_tool_names: list[
             str
         ] = []  # Lista temporal para evitar duplicados de nombres de herramientas entre servidores
+
         for parameters in self.config.servers:
             # Convierte los parámetros del servidor a formato StdioServerParameters de MCP
             stdio_params: StdioServerParameters = (
@@ -42,19 +55,23 @@ class Context:
                     server_parameters=parameters
                 )
             )
+
             # Establece la comunicación stdio con el servidor
             read, write = await self.stack.enter_async_context(
                 cm=stdio_client(server=stdio_params)
             )
+
             # Crea una sesión MCP sobre esa comunicación
             session: ClientSession = await self.stack.enter_async_context(
                 cm=ClientSession(read_stream=read, write_stream=write)
             )
+
             await session.initialize()
             self.session_tools_map[session] = []
 
             # Solicita la lista de herramientas disponibles en el servidor
             result: ListToolsResult = await session.list_tools()
+
             for tool_result in result.tools:
                 # Convierte la herramienta MCP a nuestra definición interna
                 tool_definition: ToolDefinition = tool_to_tool_definition(
@@ -62,10 +79,10 @@ class Context:
                 )
 
                 # Evita registrar herramientas con el mismo nombre (primera que aparece)
-                if tool_definition.name in tools_name:
+                if tool_definition.name in registered_tool_names:
                     continue
 
-                tools_name.append(tool_definition.name)
+                registered_tool_names.append(tool_definition.name)
                 self.session_tools_map[session].append(tool_definition)
 
     async def call_tool(self, tool_call: ToolCall) -> ToolMessage:
@@ -94,9 +111,7 @@ class Context:
                     name=tool_call.name, arguments=arguments
                 )
                 # Convertimos el resultado a texto plano
-                content: str = call_tool_result_to_content(
-                    tool_call_result=call_tool_result
-                )
+                content: str = call_tool_result_to_content(call_tool_result)
                 return ToolMessage(
                     content=content,
                     call_id=tool_call.id,

@@ -1,3 +1,11 @@
+"""
+Modelo de Lenguaje - Integración con OpenAI
+
+Este módulo encapsula la conexión con modelos de lenguaje a través de la API
+de OpenAI-compatible y proporciona un flujo de tokens para procesamiento
+de streaming.
+"""
+
 from collections.abc import AsyncGenerator
 from typing import Any
 
@@ -68,7 +76,6 @@ class Model:
             stream=True,
             parallel_tool_calls=True,
             store=store,
-            # chat_id = chat_id  # (comentado) posible soporte futuro para continuar conversaciones
         ):
             # Emitimos el ID del chat solo una vez, si no se proporcionó externamente
             if not id_emited and not chat_id:

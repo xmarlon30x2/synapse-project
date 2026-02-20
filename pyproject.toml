@@ -1,7 +1,7 @@
 [project]
 name = "synapse-project"
-version = "1.0.0"
-description = ""
+version = "1.0.1"
+description = "Framework de agentes conversacionales con soporte MCP"
 readme = "README.md"
 authors = [
     { name = "xmarlon30x2", email = "xmarlon360x2@gmail.com" }
@@ -12,6 +12,8 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Communications :: Chat",
 ]
 
 requires-python = ">=3.13"

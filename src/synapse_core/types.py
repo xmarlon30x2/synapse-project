@@ -1,6 +1,18 @@
+"""
+Definiciones de Tipos y Modelos de Datos
+
+Este módulo contiene todas las definiciones de tipos, clases de datos y
+enums utilizados en todo el sistema Synapse.
+"""
+
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Literal
+from uuid import uuid4
+
+
+def _generate_id() -> str:
+    return uuid4().hex
 
 
 class MessageRole(Enum):
@@ -35,6 +47,7 @@ class UserMessage:
 
     content: str
     role: Literal[MessageRole.user] = MessageRole.user
+    id: str = field(default_factory=_generate_id)
 
 
 @dataclass
@@ -44,6 +57,7 @@ class AssistantMessage:
     content: str
     tool_calls: list[ToolCall] = field(default_factory=list)  # type: ignore
     role: Literal[MessageRole.assistant] = MessageRole.assistant
+    id: str = field(default_factory=_generate_id)
 
 
 @dataclass
@@ -53,6 +67,7 @@ class ToolMessage:
     content: str
     call_id: str  # ID de la llamada a herramienta a la que responde
     role: Literal[MessageRole.tool] = MessageRole.tool
+    id: str = field(default_factory=_generate_id)
 
 
 # Tipo unión para cualquier mensaje

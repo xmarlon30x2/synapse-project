@@ -1,3 +1,10 @@
+"""
+Mappers - Funciones de Conversión y Validación
+
+Este módulo contiene funciones para convertir entre los tipos internos de Synapse
+y los tipos utilizados por bibliotecas externas como OpenAI y MCP.
+"""
+
 import json
 from os.path import exists
 from typing import Any, cast
@@ -42,13 +49,19 @@ from .types import (
 # Funciones de validación y conversión entre nuestros tipos internos y los tipos de OpenAI/MCP
 
 
+class SynapseValidationError(ValueError):
+    """Excepción personalizada para errores de validación en Synapse."""
+
+    pass
+
+
 def validate_message(value: Any) -> Message:
     """
     Valida que un diccionario crudo (por ejemplo, desde JSON) sea un mensaje válido
     y devuelve la instancia de Message correspondiente (UserMessage, AssistantMessage o ToolMessage).
     """
     if not isinstance(value, dict):
-        raise ValueError(f"Un mensaje debe ser un diccionario: {value}")
+        raise SynapseValidationError(f"Un mensaje debe ser un diccionario: {value}")
     value = cast(dict[str, Any], value)
     role: MessageRole = validate_role(value=value.get("role"))
     match role:
@@ -73,28 +86,30 @@ def validate_message(value: Any) -> Message:
 def validate_content(value: Any) -> str:
     """Valida que el contenido sea un string."""
     if not isinstance(value, str):
-        raise ValueError(f"Contenido no válido: {value}")
+        raise SynapseValidationError(f"Contenido no válido: {value}")
     return value
 
 
 def validate_tool_id(value: Any) -> str:
     """Valida que el ID de herramienta sea un string."""
     if not isinstance(value, str):
-        raise ValueError(f"ID de herramienta no válido: {value}")
+        raise SynapseValidationError(f"ID de herramienta no válido: {value}")
     return value
 
 
 def validate_tool_call_name(value: Any) -> str:
     """Valida que el nombre de la herramienta sea un string."""
     if not isinstance(value, str):
-        raise ValueError(f"Nombre de la herramienta no válido: {value}")
+        raise SynapseValidationError(f"Nombre de la herramienta no válido: {value}")
     return value
 
 
 def validate_arguments(value: Any) -> str:
     """Valida que los argumentos de la herramienta sean un string JSON."""
     if not isinstance(value, str):
-        raise ValueError(f"Argumentos de la herramienta no válidos: {value}")
+        raise SynapseValidationError(
+            f"Argumentos de la herramienta no válidos: {value}"
+        )
     return value
 
 
@@ -103,13 +118,13 @@ def validate_role(value: Any) -> MessageRole:
     try:
         return MessageRole(value=value)
     except ValueError:
-        raise ValueError(f"Rol no válido: {value}") from None
+        raise SynapseValidationError(f"Rol no válido: {value}") from None
 
 
 def json_filename_to_context_config(json_filename: str) -> ContextConfig:
     """Lee un archivo JSON y lo convierte en un objeto ContextConfig."""
     if exists(path=json_filename):
-        with open(file=json_filename, encoding='utf-8') as file:
+        with open(file=json_filename, encoding="utf-8") as file:
             data: Any = json.load(file)
         return validate_context_config(value=data)
     return ContextConfig(servers=[])
@@ -118,13 +133,15 @@ def json_filename_to_context_config(json_filename: str) -> ContextConfig:
 def validate_context_config(value: Any) -> ContextConfig:
     """Valida que el diccionario de configuración del contexto sea correcto."""
     if not isinstance(value, dict):
-        raise ValueError(
+        raise SynapseValidationError(
             f"La configuración del contexto debe ser un diccionario: {value}"
         )
     value = cast(dict[str, Any], value)
     servers_raw = value.get("servers")
     if not isinstance(servers_raw, list):
-        raise ValueError(f"Los servidores deben estar en una lista: {servers_raw}")
+        raise SynapseValidationError(
+            f"Los servidores deben estar en una lista: {servers_raw}"
+        )
     servers_raw = cast(list[Any], servers_raw)
     return ContextConfig(servers=list(map(validate_server_parameter, servers_raw)))
 
@@ -138,7 +155,9 @@ def validate_server_parameter(value: Any) -> ServerParameters:
 def validate_tool_calls(value: Any) -> list[ToolCall]:
     """Valida que sea una lista de llamadas a herramientas."""
     if not isinstance(value, list):
-        raise ValueError(f"Las llamadas a herramientas deben ser una lista: {value}")
+        raise SynapseValidationError(
+            f"Las llamadas a herramientas deben ser una lista: {value}"
+        )
     value = cast(list[Any], value)
     return [validate_tool_call(value=item) for item in value]
 
@@ -146,7 +165,7 @@ def validate_tool_calls(value: Any) -> list[ToolCall]:
 def validate_tool_call(value: Any) -> ToolCall:
     """Valida un diccionario de llamada a herramienta y devuelve un objeto ToolCall."""
     if not isinstance(value, dict):
-        raise ValueError(
+        raise SynapseValidationError(
             f"Una llamada a una herramienta debe ser un diccionario: {value}"
         )
     value = cast(dict[str, Any], value)
