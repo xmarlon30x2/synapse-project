@@ -44,12 +44,12 @@ async def async_main() -> None:
         default="./synapse-memory.json",
     )
     parser.add_argument(
-        "--memory-max-messages", help="Numero maximo de mensajes", default=60, type=int
+        "--memory-max-messages", help="Numero maximo de mensajes", default=100, type=int
     )
     parser.add_argument(
-        "--memory-sumarize-message",
+        "--memory-summary-threshold",
         help="Numero de mensajes a incluir en el resumen",
-        default=10,
+        default=40,
         type=int,
     )
     parser.add_argument(
@@ -100,10 +100,10 @@ async def async_main() -> None:
 
             memory = SummarizingJSONFileMemory(
                 filename=filename,
-                max_messages=args.memory_max_messages,
-                sumarize_prompt=args.memory_sumarize_prompt,
                 model=model,
-                sumarize_message=args.memory_sumarize_message,
+                summary_threshold=args.memory_summary_threshold,
+                max_messages=args.memory_max_messages,
+                sumarize_prompt=args.memory_sumarize_prompt
             )
 
         elif args.type == "json-file":
